@@ -8,8 +8,8 @@ authors = ["Evgeny Arshinov <earshinov@gmail.com>"]
 python = "^3.8"
 
 [tool.poetry.dev-dependencies]
-mypy = "^0.910"
 lxml = "^4.6.3"
+mypy = {git = "https://github.com/python/mypy.git"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
