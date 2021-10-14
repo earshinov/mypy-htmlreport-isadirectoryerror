@@ -1,0 +1,68 @@
+:nofooter:
+:linkattrs:
+
+== Preparation
+
+----
+$ poetry install --no-root
+----
+
+== Repro
+
+**A**. Mypy works fine with `-p` and without `--html-report`:
+
+----
+$ poetry run mypy -p folder
+Success: no issues found in 4 source files
+----
+
+**B**. Mypy works fine with `--html-report` and without `-p`:
+
+----
+$ poetry run mypy folder --html-report=mypy-report
+Generated HTML report (via XSLT): /mnt/c/tmp/mypy-bug/mypy-report/index.html
+Success: no issues found in 3 source files
+----
+
+[NOTE]
+====
+In the real repo I cannot omit `-p` because of errors mypy reports in local namespace packages:
+
+----
+ldap_tool/commands/fetch_users.py:10: error: Skipping analyzing ".base": found module but no type hints or library stubs
+----
+====
+
+**C**. Mypy breaks when passed both `-p` and `--html-report`:
+
+----
+$ poetry run mypy -p folder --html-report=mypy-report
+/mnt/c/tmp/mypy-bug/folder/subfolder: error: INTERNAL ERROR -- Please try using mypy master on Github:
+https://mypy.readthedocs.io/en/stable/common_issues.html#using-a-development-mypy-build
+If this issue continues with mypy master, please report a bug at https://github.com/python/mypy/issues
+version: 0.910
+/mnt/c/tmp/mypy-bug/folder/subfolder: : note: please use --show-traceback to print a traceback when reporting a bug
+Generated HTML report (via XSLT): /mnt/c/tmp/mypy-bug/mypy-report/index.html
+----
+
+----
+$ poetry run mypy -p folder --html-report=mypy-report --show-traceback
+/mnt/c/tmp/mypy-bug/folder/subfolder: error: INTERNAL ERROR -- Please try using mypy master on Github:
+https://mypy.readthedocs.io/en/stable/common_issues.html#using-a-development-mypy-build
+Please report a bug at https://github.com/python/mypy/issues
+version: 0.910
+Traceback (most recent call last):
+  File "/home/user/.cache/pypoetry/virtualenvs/mypy-bug-3PnpPrM--py3.8/bin/mypy", line 8, in <module>
+    sys.exit(console_entry())
+  File "mypy/build.py", line 1955, in wrap_context
+  File "mypy/build.py", line 2205, in finish_passes
+  File "mypy/build.py", line 818, in report_file
+  File "mypy/report.py", line 83, in file
+  File "mypy/report.py", line 482, in on_file
+  File "mypy/report.py", line 131, in iterate_python_lines
+  File "/usr/lib/python3.8/tokenize.py", line 392, in open
+    buffer = _builtin_open(filename, 'rb')
+IsADirectoryError: [Errno 21] Is a directory: 'folder/subfolder'
+/mnt/c/tmp/mypy-bug/folder/subfolder: : note: use --pdb to drop into pdb
+Generated HTML report (via XSLT): /mnt/c/tmp/mypy-bug/mypy-report/index.html
+----
